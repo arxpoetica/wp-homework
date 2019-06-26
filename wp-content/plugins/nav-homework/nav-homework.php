@@ -16,6 +16,8 @@ class NavHomework {
 
 	function __construct() {
 		add_action('init', array($this, 'sweaters_post_type'));
+		add_filter('template_include', array($this, 'sweaters_archive_page'));
+		add_filter('query_vars', array($this, 'add_query_vars_filter'));
 		$this->templates = array();
 	}
 
@@ -28,10 +30,6 @@ class NavHomework {
 		flush_rewrite_rules();
 	}
 
-	function sweaters_post_type() {
-		register_post_type('sweaters', ['public' => true, 'label' => 'Sweaters']);
-	}
-
 	function register() {
 		add_action('wp_enqueue_scripts', array($this, 'enqueue'));
 	}
@@ -39,6 +37,26 @@ class NavHomework {
 	function enqueue() {
 		wp_enqueue_style('nav-homework-style', plugins_url('/assets/nav-homework.css', __FILE__));
 		wp_enqueue_script('nav-homework-script', plugins_url('/assets/nav-homework.js', __FILE__));
+	}
+
+	function sweaters_post_type() {
+		register_post_type('sweaters', [
+			'public' => true,
+			'labels' => ['name' => __('Sweaters'), 'singular_name' => __('Sweater')],
+			'has_archive' => true,
+		]);
+	}
+
+	function add_query_vars_filter($vars) {
+		$vars[] = "sort";
+		return $vars;
+	}
+
+	function sweaters_archive_page($template) {
+		if(is_post_type_archive('sweaters')) {
+			return WP_PLUGIN_DIR . '/' . plugin_basename(dirname(__FILE__)) . '/templates/archive-sweaters.php';
+		}
+		return $template;
 	}
 
 }
