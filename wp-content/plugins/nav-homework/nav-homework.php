@@ -18,6 +18,7 @@ class NavHomework {
 		add_action('init', array($this, 'sweaters_post_type'));
 		add_filter('template_include', array($this, 'sweaters_archive_page'));
 		add_filter('query_vars', array($this, 'add_query_vars_filter'));
+		add_action('pre_get_posts', array($this, 'change_sort_order'));
 		$this->templates = array();
 	}
 
@@ -35,8 +36,10 @@ class NavHomework {
 	}
 
 	function enqueue() {
-		wp_enqueue_style('nav-homework-style', plugins_url('/assets/nav-homework.css', __FILE__));
-		wp_enqueue_script('nav-homework-script', plugins_url('/assets/nav-homework.js', __FILE__));
+		if(is_post_type_archive('sweaters')) {
+			// wp_enqueue_style('nav-homework-style', plugins_url('/assets/nav-homework.css', __FILE__));
+			wp_enqueue_script('nav-homework-script', plugins_url('/assets/nav-homework.js', __FILE__));
+		}
 	}
 
 	function sweaters_post_type() {
@@ -57,6 +60,12 @@ class NavHomework {
 			return WP_PLUGIN_DIR . '/' . plugin_basename(dirname(__FILE__)) . '/templates/archive-sweaters.php';
 		}
 		return $template;
+	}
+
+	function change_sort_order($query) {
+		if (is_post_type_archive('sweaters') and strtolower(get_query_var('sort')) === 'asc') {
+			$query->set('order', 'ASC');
+		}
 	}
 
 }
